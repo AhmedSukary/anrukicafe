@@ -256,14 +256,14 @@ async function renderTableBox(table) {
 }
 
 CanselOrderEle.addEventListener("click", async () => {
-    if (order == null || OrderItemsEle.innerHTML == "")
+    if (currentOrder == null || OrderItemsEle.innerHTML == "")
         return alert("ℹ️ No order to cansel");
     try {
         let answer = confirm("ℹ️ Do you want to remove all order items?");
         if (answer) {
             const result = await RemoveAllItems(order.id);
-            order.total = 0;
-            OrderTotalAmountEle.innerText = order.total + "₺";
+            currentOrder.total = 0;
+            OrderTotalAmountEle.innerText = currentOrder.total + "₺";
             OrderItemsEle.innerHTML = "";
             TableNumberEle.innerText = "???";
             currentTable = null;
