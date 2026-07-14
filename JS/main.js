@@ -261,13 +261,13 @@ CanselOrderEle.addEventListener("click", async () => {
     try {
         let answer = confirm("ℹ️ Do you want to remove all order items?");
         if (answer) {
-            const result = await RemoveAllItems(order.id);
+            const result = await RemoveAllItems(currentOrder.id);
             currentOrder.total = 0;
             OrderTotalAmountEle.innerText = currentOrder.total + "₺";
             OrderItemsEle.innerHTML = "";
             TableNumberEle.innerText = "???";
             currentTable = null;
-            alert("✅ " + result);
+            alert("✅ " + result.success);
         }
         else
             return;
