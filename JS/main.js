@@ -300,5 +300,5 @@ SendOrderEle.addEventListener("click", async () => {
 });
 
 Logout.addEventListener("click", () => {
-    location.href = "/login.html";
+    location.href = "./login.html";
 });
