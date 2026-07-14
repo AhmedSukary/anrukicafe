@@ -1,4 +1,4 @@
-const API_BASE = "http://anrukicafeapi.runasp.net/api";
+const API_BASE = "https://anrukicafeapi.runasp.net/api";
 
 function getToken() {
     return localStorage.getItem("accessToken");
