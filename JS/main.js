@@ -106,7 +106,7 @@ async function renderOrderItems(orderId) {
         });
         currentOrder.total += (i.price * i.quantity);
     }
-    OrderTotalAmountEle.innerText = order.total + "₺";
+    OrderTotalAmountEle.innerText = currentOrder.total + "₺";
 }
 
 async function renderProductsByCategoryById(id) {
