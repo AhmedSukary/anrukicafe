@@ -156,7 +156,7 @@ async function renderTables() {
     for (const t of tables) {
         TablesEle.insertAdjacentHTML("beforeend", `
             <div id="table-${t.id}" class="table ${t.status}">
-                <button id="button-${t.id}"> <img src="/imgs/table.png" alt="">${t.number}</button>       
+                <button id="button-${t.id}"> <img src="imgs/table.png" alt="">${t.number}</button>       
             </div>
         `);
 
@@ -180,7 +180,7 @@ async function renderTableBox(table) {
     TableBox.classList.remove("hidden");
     TableBox.insertAdjacentHTML("beforeend", `
         <div class="closeBtn"><button id="closeBtn">x</button></div>
-        <div class="table ${table.status}"> <img src="/imgs/table.png"alt="">${table.number}</div>    
+        <div class="table ${table.status}"> <img src="imgs/table.png"alt="">${table.number}</div>    
     `);
 
     const orders = await GetTableUnpaidOrdersByTableNumber(table.number);
