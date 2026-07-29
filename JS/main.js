@@ -12,6 +12,7 @@ import {
     GetAllExtraDetailsOrderItem
 } from "./features/orderService.js";
 
+
 const params = new URLSearchParams(window.location.search);
 const UseingSystemName = params.get("UseingSystemName");
 document.getElementById("useingSystemName").innerText = UseingSystemName;
