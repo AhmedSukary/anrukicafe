@@ -30,6 +30,7 @@ const OrderItemsEle = document.getElementById("orderItems");
 const ProductsEle = document.getElementById("products");
 const TablesEle = document.getElementById("tables");
 const TableBox = document.getElementById("tableBox");
+const Loading = document.getElementById("loading");
 const ExtraOrderItemBox = document.getElementById("extraOrderItemBox");
 const CategoriesBtns = document.querySelectorAll(".categoryBtn");
 
@@ -349,17 +350,14 @@ SendOrderEle.addEventListener("click", async () => {
         return alert("ℹ️ No order to sand");
 
     try {
-        let answer = confirm("ℹ️ Do you want to continue sending the order?");
-        if (answer) {
-            await UpdateOrder(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
-            await UpdateTable(currentTable.id, currentTable.number, currentTable.isAvailable, "Processing");
-            alert("✅ Order Sended successfully!");
-            currentTable = null;
-            currentOrder = null;
-            location.reload();
-        }
-        else
-            return;
+
+        Loading.classList.remove("hidden");
+        await UpdateOrder(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
+        await UpdateTable(currentTable.id, currentTable.number, currentTable.isAvailable, "Processing");
+        currentTable = null;
+        currentOrder = null;
+        location.reload();
+
     }
     catch (err) {
         alert("⚠️ " + err.message);
