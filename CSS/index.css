@@ -19,7 +19,7 @@ body {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100vh;
+    height: 100dvh;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -412,6 +412,7 @@ section .order .print button img {
 }
 
 section .Categories {
+    flex-shrink: 0;
     margin-top: 5px;
     padding: 5px;
     width: 100%;
@@ -436,7 +437,7 @@ section .Categories button.active {
 }
 
 section .products {
-    flex-grow: 1 1 auto;
+    flex-grow: 1;
     min-height: 0;
     overflow-y: scroll;
     display: flex;
