@@ -8,6 +8,10 @@ export async function GetAllOrderItemsByOrderId(orderId) {
     return await get("/Order/GetAllOrderItemsBy/" + orderId);
 }
 
+export async function GetAllExtraDetailsOrderItem() {
+    return await get("/Order/GetAllExtraDetailsOrderItem");
+}
+
 export async function AddNewOrder(orderedName, tableNumber) {
     const result = await post("/Order/AddNewOrder", {
         orderedName,
@@ -16,13 +20,12 @@ export async function AddNewOrder(orderedName, tableNumber) {
     return result;
 }
 
-export async function AddOrderItem(orderId, name, description, price, quantity) {
+export async function AddOrderItem(orderId, name, description, price) {
     const result = await post("/Order/AddOrderItem", {
         orderId,
         name,
         description,
         price,
-        quantity,
     });
     return result;
 }
@@ -40,14 +43,13 @@ export async function UpdateOrder(id, status, payment, orderedName, total, table
     return result;
 }
 
-export async function UpdateItem(id, orderId, name, description, price, quantity) {
+export async function UpdateItem(id, orderId, name, description, price) {
     const result = await put("/Order/EditOrderItem", {
         id,
         orderId,
         name,
         description,
         price,
-        quantity,
     });
     return result;
 }

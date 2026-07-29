@@ -8,7 +8,8 @@ import {
     AddOrderItem,
     UpdateItem,
     RemoveItem,
-    RemoveAllItems
+    RemoveAllItems,
+    GetAllExtraDetailsOrderItem
 } from "./features/orderService.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -28,6 +29,7 @@ const OrderItemsEle = document.getElementById("orderItems");
 const ProductsEle = document.getElementById("products");
 const TablesEle = document.getElementById("tables");
 const TableBox = document.getElementById("tableBox");
+const ExtraOrderItemBox = document.getElementById("extraOrderItemBox");
 const CategoriesBtns = document.querySelectorAll(".categoryBtn");
 
 await renderTables();
@@ -58,11 +60,15 @@ async function addOrderItem(name, price, quantity) {
     try {
         if (currentOrder == null) {
             await addNewOrder();
-            await AddOrderItem(currentOrder.id, name, "", price, quantity);
+            for (let i = 0; i < quantity; i++) {
+                await AddOrderItem(currentOrder.id, name, "", price);
+            }
             await renderOrderItems(currentOrder.id);
             return;
         }
-        await AddOrderItem(currentOrder.id, name, "", price, quantity);
+        for (let i = 0; i < quantity; i++) {
+            await AddOrderItem(currentOrder.id, name, "", price);
+        }
         await renderOrderItems(currentOrder.id);
     }
     catch (err) {
@@ -80,11 +86,11 @@ async function renderOrderItems(orderId) {
             <div class="item">
                 <div class="info">
                     <div class="details">
-                        <span>${i.quantity}</span>
+                        <span>1</span>
                         <span>${i.name}</span>
                     </div>
                     <div class="controls">
-                        <button id="save-item-${i.id}"><img src="imgs/18442.png" alt=""></button>
+                        <button id="add-extra-order-item-${i.id}"><img src="imgs/edit-editor-pen-pencil-write-icon--4.png" alt=""></button>
                         <button id="remove-item-${i.id}"><img src="imgs/1345874.png" alt=""></button>
                     </div>
                 </div>
@@ -94,17 +100,16 @@ async function renderOrderItems(orderId) {
             </div>      
         `);
 
-        document.getElementById(`save-item-${i.id}`).addEventListener("click", async () => {
+        document.getElementById(`add-extra-order-item-${i.id}`).addEventListener("click", async () => {
             let description = document.getElementById(`description-item-${i.id}`).value;
-            await UpdateItem(i.id, i.orderId, i.name, description, i.price, i.quantity);
-            renderOrderItems(orderId);
+            await renderExtraOrderItemBox(i.id, i.orderId, i.name, description, i.price);
         });
 
         document.getElementById(`remove-item-${i.id}`).addEventListener("click", async () => {
             await RemoveItem(i.id);
             renderOrderItems(orderId);
         });
-        currentOrder.total += (i.price * i.quantity);
+        currentOrder.total += i.price;
     }
     OrderTotalAmountEle.innerText = currentOrder.total + "₺";
 }
@@ -173,6 +178,66 @@ async function renderTables() {
     }
 }
 
+async function renderExtraOrderItemBox(id, orderId, name, description, price) {
+    try {
+        const extraItems = await GetAllExtraDetailsOrderItem();
+        let extraPrice = price;
+        ExtraOrderItemBox.innerHTML = "";
+        ExtraOrderItemBox.classList.remove("hidden");
+        ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
+            <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
+            <div id="extraOrderItems" class="extraOrderItems"></div>
+            <div class="item">
+                <div class="info">
+                    <div class="details">
+                        <span>${name}</span>
+                        <span id="extraOrderItemPrice" class="price">${price}₺</span>
+                        <button id="extraOrderItemCanselBtn"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>
+                    </div>
+                </div>
+                <div class="description">
+                    <textarea id="extraOrderItemDescription">${description}</textarea>        
+                </div>
+            </div>
+            <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+        `);
+
+        const extraOrderItems = document.getElementById("extraOrderItems");
+        for (const item of extraItems) {
+            extraOrderItems.insertAdjacentHTML("beforeend", `
+                <div class="extraOrderItem">
+                    <button id="extraPriceBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
+                </div>  
+            `);
+
+            document.getElementById(`extraPriceBtn-${item.id}`).addEventListener("click", () => {
+                extraPrice += item.extraPrice;
+                document.getElementById("extraOrderItemPrice").innerHTML = extraPrice + "₺";
+                document.getElementById("extraOrderItemDescription").value += " " + item.extraDetails + " ";
+            });
+        }
+
+        document.getElementById("extraOrderItemCanselBtn").addEventListener("click", () => {
+            extraPrice = price;
+            document.getElementById("extraOrderItemPrice").innerHTML = extraPrice + "₺";
+            document.getElementById("extraOrderItemDescription").value = description;
+        });
+
+        document.getElementById("extraOrderItemBoxCompleteBtn").addEventListener("click", async () => {
+            await UpdateItem(id, orderId, name, document.getElementById("extraOrderItemDescription").value, extraPrice);
+            await renderOrderItems(orderId);
+            ExtraOrderItemBox.classList.add("hidden");
+        });
+
+        document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
+            ExtraOrderItemBox.classList.add("hidden");
+        });
+    }
+    catch (err) {
+        alert("⚠️ " + err.message);
+    }
+}
+
 async function renderTableBox(table) {
 
     currentTable = table;
@@ -180,7 +245,7 @@ async function renderTableBox(table) {
     TableBox.classList.remove("hidden");
     TableBox.insertAdjacentHTML("beforeend", `
         <div class="closeBtn"><button id="closeBtn">x</button></div>
-        <div class="table ${table.status}"> <img src="imgs/table.png"alt="">${table.number}</div>    
+        <div class="table ${table.status}"> <img src="imgs/table.png" alt="">${table.number}</div>    
     `);
 
     const orders = await GetTableUnpaidOrdersByTableNumber(table.number);
@@ -200,12 +265,13 @@ async function renderTableBox(table) {
         for (const Itme of Items) {
             document.getElementById(`orderItems-${order.id}`).insertAdjacentHTML("beforeend", `
                 <div class="item">
-                    <span>${Itme.quantity}</span>
+                    <span>1</span>
                     <span>${Itme.name}</span>
                     <p>${Itme.description}</p>
                 </div>
             `);
         }
+
     }
 
     document.getElementById("closeBtn").addEventListener("click", () => {
