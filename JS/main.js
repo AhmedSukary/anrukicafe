@@ -91,6 +91,7 @@ async function renderOrderItems(orderId) {
                     <div class="details">
                         <span>1</span>
                         <span>${i.name}</span>
+                        <span>${i.price}₺</span>
                     </div>
                     <div class="controls">                       
                         <button id="remove-item-${i.id}"><img src="imgs/1345874.png" alt=""></button>
