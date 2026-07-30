@@ -11,13 +11,20 @@
 </head>
 
 <body>
-    <div id="loading" class="loading hidden">     
+    <div id="loading" class="loading hidden">
         <span class="spinner"></span>
         <p>Please wait ...</p>
     </div>
 
     <div id="tableBox" class="hidden"></div>
-    <div id="extraOrderItemBox" class="hidden"></div>
+
+    <div id="extraOrderItemBox" class="hidden">     
+        <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
+        <div class="checkAll"><input type="checkbox" name="" id="checkAllOrderItemsToAddExtra"> All</div>
+        <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>
+        <div id="extraOrderItems" class="extraOrderItems"></div>
+        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+    </div>
 
     <section id="section">
         <div id="tables" class="tables">
@@ -29,6 +36,7 @@
                     <div>ID: <span id="orderId">???</span></div>
                     <div>Table Number: <span id="tableNumber">???</span></div>
                 </div>
+                <button id="addExtraToOrder"><img src="imgs/25304.png" alt=""></button>
                 <button id="canselOrder"><img
                         src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png"
                         alt=""></button>

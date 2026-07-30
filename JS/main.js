@@ -25,6 +25,7 @@ const TableNumberEle = document.getElementById("tableNumber");
 const OrderTotalAmountEle = document.getElementById("orderTotalAmount");
 const SendOrderEle = document.getElementById("sendOrder");
 const CanselOrderEle = document.getElementById("canselOrder");
+const AddExtraToOrder = document.getElementById("addExtraToOrder");
 const Logout = document.getElementById("logout");
 const OrderItemsEle = document.getElementById("orderItems");
 const ProductsEle = document.getElementById("products");
@@ -91,8 +92,7 @@ async function renderOrderItems(orderId) {
                         <span>1</span>
                         <span>${i.name}</span>
                     </div>
-                    <div class="controls">
-                        <button id="add-extra-order-item-${i.id}"><img src="imgs/edit-editor-pen-pencil-write-icon--4.png" alt=""></button>
+                    <div class="controls">                       
                         <button id="remove-item-${i.id}"><img src="imgs/1345874.png" alt=""></button>
                     </div>
                 </div>
@@ -101,12 +101,6 @@ async function renderOrderItems(orderId) {
                 </div>
             </div>      
         `);
-
-        document.getElementById(`add-extra-order-item-${i.id}`).addEventListener("click", async () => {
-            let description = document.getElementById(`description-item-${i.id}`).value;
-            await renderExtraOrderItemBox(i.id, i.orderId, i.name, description, i.price);
-        });
-
         document.getElementById(`remove-item-${i.id}`).addEventListener("click", async () => {
             await RemoveItem(i.id);
             renderOrderItems(orderId);
@@ -180,65 +174,75 @@ async function renderTables() {
     }
 }
 
-async function renderExtraOrderItemBox(id, orderId, name, description, price) {
-    try {
-        const extraItems = await GetAllExtraDetailsOrderItem();
-        let extraPrice = price;
-        ExtraOrderItemBox.innerHTML = "";
-        ExtraOrderItemBox.classList.remove("hidden");
-        ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
-            <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
-            <div id="extraOrderItems" class="extraOrderItems"></div>
-            <div class="item">
-                <div class="info">
-                    <div class="details">
-                        <span>${name}</span>
-                        <span id="extraOrderItemPrice" class="price">${price}₺</span>
-                        <button id="extraOrderItemCanselBtn"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>
-                    </div>
-                </div>
-                <div class="description">
-                    <textarea id="extraOrderItemDescription">${description}</textarea>        
-                </div>
-            </div>
-            <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
-        `);
+// async function renderAddExtraOrderItemBox(orderItems) {
+//     try {
+//         const extraItems = await GetAllExtraDetailsOrderItem();
 
-        const extraOrderItems = document.getElementById("extraOrderItems");
-        for (const item of extraItems) {
-            extraOrderItems.insertAdjacentHTML("beforeend", `
-                <div class="extraOrderItem">
-                    <button id="extraPriceBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
-                </div>  
-            `);
+//         ExtraOrderItemBox.innerHTML = "";
+//         ExtraOrderItemBox.classList.remove("hidden");
+//         ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
+//             <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
+//             <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>           
+//             <div id="extraOrderItems" class="extraOrderItems"></div>           
+//             <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+//         `);
 
-            document.getElementById(`extraPriceBtn-${item.id}`).addEventListener("click", () => {
-                extraPrice += item.extraPrice;
-                document.getElementById("extraOrderItemPrice").innerHTML = extraPrice + "₺";
-                document.getElementById("extraOrderItemDescription").value += " " + item.extraDetails + " ";
-            });
-        }
+//         const orderItemsToAddExtra = document.getElementById("orderItemsToAddExtra");
+//         for (const item of orderItems) {
+//             orderItemsToAddExtra.insertAdjacentHTML("beforeend", `
+//             <div class="item">
+//                 <div class="info">
+//                     <div class="details">
+//                         <span>1</span>
+//                         <span>${item.name}</span>
+//                     </div>
+//                 </div>
+//                 <div class="description">
+//                     <input id="description-item-${item.id}" type="text" value="${item.description}">
+//                 </div>
+//             </div>      
+//         `);
+//         }
 
-        document.getElementById("extraOrderItemCanselBtn").addEventListener("click", () => {
-            extraPrice = price;
-            document.getElementById("extraOrderItemPrice").innerHTML = extraPrice + "₺";
-            document.getElementById("extraOrderItemDescription").value = description;
-        });
+//         const extraOrderItems = document.getElementById("extraOrderItems");
+//         for (const item of extraItems) {
+//             extraOrderItems.insertAdjacentHTML("beforeend", `
+//                 <div class="extraOrderItem">
+//                     <button id="extraOrderItemBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
+//                 </div>  
+//             `);
 
-        document.getElementById("extraOrderItemBoxCompleteBtn").addEventListener("click", async () => {
-            await UpdateItem(id, orderId, name, document.getElementById("extraOrderItemDescription").value, extraPrice);
-            await renderOrderItems(orderId);
-            ExtraOrderItemBox.classList.add("hidden");
-        });
+//             document.getElementById(`extraOrderItemBtn-${item.id}`).addEventListener("click", () => {
 
-        document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
-            ExtraOrderItemBox.classList.add("hidden");
-        });
-    }
-    catch (err) {
-        alert("⚠️ " + err.message);
-    }
-}
+//             });
+//         }
+
+//         const extraOrderItems = document.getElementById("extraOrderItems");
+//         for (const item of extraItems) {
+//             extraOrderItems.insertAdjacentHTML("beforeend", `
+//                 <div class="extraOrderItem">
+//                     <button id="extraOrderItemBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
+//                 </div>  
+//             `);
+
+//             document.getElementById(`extraOrderItemBtn-${item.id}`).addEventListener("click", () => {
+
+//             });
+//         }
+
+
+//         document.getElementById("extraOrderItemBoxCompleteBtn").addEventListener("click", async () => {
+//             ExtraOrderItemBox.classList.add("hidden");
+//         });
+
+//         document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
+//             ExtraOrderItemBox.classList.add("hidden");
+//         });
+//     }
+//     catch (err) {
+//         alert("⚠️ " + err.message);
+//     }
+// }
 
 async function renderTableBox(table) {
 
@@ -344,6 +348,238 @@ CanselOrderEle.addEventListener("click", async () => {
         alert("⚠️ " + err.message);
     }
 });
+
+class OrderItemsToAddExtraControl {
+
+    constructor(id, orderId, name, price, description) {
+        this.IsComplete = false;
+        this.IsChecked = false;
+        this.id = id;
+        this.orderId = orderId;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.extraPrice = price
+        this.extraDetails = description;
+    }
+
+    AddExtra(extraPrice, extraDetails) {
+        this.extraPrice += extraPrice;
+        this.extraDetails += extraDetails;
+    }
+
+    Clear() {
+        this.extraPrice = this.price;
+        this.extraDetails = this.description;
+    }
+
+    Check() {
+        this.IsChecked = true;
+    }
+
+    UnCheck() {
+        this.IsChecked = false;
+    }
+
+    CompleteExtraDetails() {
+        this.IsComplete = true;
+    }
+
+    async Save() {
+        try {
+            await UpdateItem(this.id, this.orderId, this.name,this.extraDetails, this.extraPrice);
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    }
+}
+
+let controls = [];
+
+function renderOrderItemsToAddExtraControls() {
+
+    const orderItemsToAddExtra = document.getElementById("orderItemsToAddExtra");
+    orderItemsToAddExtra.innerHTML = "";
+
+    for (const control of controls) {
+
+        if (control.IsComplete === true && control.IsChecked === true) {
+            orderItemsToAddExtra.insertAdjacentHTML("beforeend", `
+            <div class="orderItemToAddExtra" style="background-color: #b4b4b4;">
+                <div class="details">
+                    <input type="checkbox" checked disabled name="" id="orderItemsToAddExtraCheckbox-${control.id}">
+                    <span>1</span>
+                    <span>${control.name}</span>
+                    <span>${control.extraPrice}₺</span>
+                </div>
+                <div class="description">
+                    <textarea name="" id="">${control.extraDetails}</textarea>
+                    <div class="controls">
+                        <button disabled id="extraOrderItemClearBtn-${control.id}"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>                       
+                        <button disabled id="extraOrderItemCompleteBtn-${control.id}"><img src="imgs/18442.png" alt=""></button>
+                    </div>
+                </div>
+            </div>
+        `);
+        }
+
+        if (control.IsComplete === false && control.IsChecked === true) {
+            orderItemsToAddExtra.insertAdjacentHTML("beforeend", `
+            <div class="orderItemToAddExtra">
+                <div class="details">
+                    <input type="checkbox" checked name="" id="orderItemsToAddExtraCheckbox-${control.id}">
+                    <span>1</span>
+                    <span>${control.name}</span>
+                    <span>${control.extraPrice}₺</span>
+                </div>
+                <div class="description">
+                    <textarea name="" id="">${control.extraDetails}</textarea>
+                    <div class="controls">
+                        <button id="extraOrderItemClearBtn-${control.id}"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>                       
+                        <button id="extraOrderItemCompleteBtn-${control.id}"><img src="imgs/18442.png" alt=""></button>
+                    </div>
+                </div>
+            </div>
+            `);
+            document.getElementById(`extraOrderItemClearBtn-${control.id}`).addEventListener("click", () => {
+                control.Clear();
+                renderOrderItemsToAddExtraControls();
+            });
+            document.getElementById(`extraOrderItemCompleteBtn-${control.id}`).addEventListener("click", () => {
+                control.CompleteExtraDetails();
+                renderOrderItemsToAddExtraControls();
+            });
+            document.getElementById(`orderItemsToAddExtraCheckbox-${control.id}`).addEventListener("change", function () {
+                if (this.checked) {
+                    control.IsChecked = true;
+                    renderOrderItemsToAddExtraControls();
+                } else {
+                    control.IsChecked = false;
+                    renderOrderItemsToAddExtraControls();
+                }
+            });
+        }
+
+        if (control.IsComplete === false && control.IsChecked === false) {
+            orderItemsToAddExtra.insertAdjacentHTML("beforeend", `
+            <div class="orderItemToAddExtra">
+                <div class="details">
+                    <input type="checkbox" name="" id="orderItemsToAddExtraCheckbox-${control.id}">
+                    <span>1</span>
+                    <span>${control.name}</span>
+                    <span>${control.extraPrice}₺</span>
+                </div>
+                <div class="description">
+                    <textarea name="" id="">${control.extraDetails}</textarea>
+                    <div class="controls">
+                        <button id="extraOrderItemClearBtn-${control.id}"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>                       
+                        <button id="extraOrderItemCompleteBtn-${control.id}"><img src="imgs/18442.png" alt=""></button>
+                    </div>
+                </div>
+            </div>
+            `);
+
+            document.getElementById(`extraOrderItemClearBtn-${control.id}`).addEventListener("click", () => {
+                control.Clear();
+                renderOrderItemsToAddExtraControls();
+            });
+
+            document.getElementById(`extraOrderItemCompleteBtn-${control.id}`).addEventListener("click", () => {
+                control.CompleteExtraDetails();
+                renderOrderItemsToAddExtraControls();
+            });
+
+            document.getElementById(`orderItemsToAddExtraCheckbox-${control.id}`).addEventListener("change", function () {
+                if (this.checked) {
+                    control.IsChecked = true;
+                    renderOrderItemsToAddExtraControls();
+                } else {
+                    control.IsChecked = false;
+                    renderOrderItemsToAddExtraControls();
+                }
+            });
+        }
+    }
+}
+
+AddExtraToOrder.addEventListener("click", async () => {
+    if (currentOrder == null || OrderItemsEle.innerHTML == "")
+        return alert("ℹ️ No order to cansel");
+
+    controls = [];
+    const extraItems = await GetAllExtraDetailsOrderItem();
+    const orderItems = await GetAllOrderItemsByOrderId(currentOrder.id);
+
+    ExtraOrderItemBox.classList.remove("hidden");
+    document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
+        ExtraOrderItemBox.classList.add("hidden");
+    });
+
+    for (const item of orderItems) {
+        controls.push(new OrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description));
+    }
+
+    renderOrderItemsToAddExtraControls();
+
+    const extraOrderItems = document.getElementById("extraOrderItems");
+    for (const item of extraItems) {
+        extraOrderItems.insertAdjacentHTML("beforeend", `
+                <div class="extraOrderItem">
+                    <button id="extraOrderItemBtn-${item.id}">${item.extraDetails}<br>${item.extraPrice}₺</button>
+                </div>  
+        `);
+
+        document.getElementById(`extraOrderItemBtn-${item.id}`).addEventListener("click", async () => {
+            for (const control of controls) {
+                if (control.IsComplete !== true && control.IsChecked === true) {
+                    control.AddExtra(item.extraPrice, item.extraDetails)
+                    renderOrderItemsToAddExtraControls();
+                }
+            }
+        });
+    }
+    const checkAllOrderItemsToAddExtra = document.getElementById("checkAllOrderItemsToAddExtra").addEventListener("change", function () {
+        if (this.checked) {
+            for (const control of controls) {
+                if (control.IsComplete === false) {
+                    control.Check();
+                    renderOrderItemsToAddExtraControls();
+                }
+            }
+        } else {
+            for (const control of controls) {
+                if (control.IsComplete === false) {
+                    control.UnCheck();
+                    renderOrderItemsToAddExtraControls();
+                }
+            }
+        }
+    });
+    const extraOrderItemBoxCompleteBtn = document.getElementById("extraOrderItemBoxCompleteBtn").addEventListener("click", async () => {
+        for (const control of controls) {
+            await control.Save();
+        }
+        ExtraOrderItemBox.classList.add("hidden");
+        await renderOrderItems(currentOrder.id);
+    });
+});
+
+{/* <div class="orderItemToAddExtra">
+                <div class="details">
+                    <input type="checkbox" name="" id="">
+                    <span>1</span>
+                    <span>name</span>
+                    <span>00</span>
+                </div>
+                <div class="description">
+                    <textarea name="" id=""></textarea>
+                    <div class="controls">
+                        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>                       
+                        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+                    </div>
+                </div>
+            </div>   */}
 
 SendOrderEle.addEventListener("click", async () => {
     if (currentOrder == null || OrderItemsEle.innerHTML == "")
