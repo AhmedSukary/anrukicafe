@@ -20,6 +20,19 @@ export async function AddNewOrder(orderedName, tableNumber) {
     return result;
 }
 
+export async function AddOrderToPrint(id, status, payment, orderedName, total, tableNumber, createdAt) {
+    const result = await post("/Order/AddOrderToPrint", {
+        id,
+        status,
+        payment,
+        orderedName,
+        total,
+        tableNumber,
+        createdAt,
+    });
+    return result;
+}
+
 export async function AddOrderItem(orderId, name, description, price, printerName) {
     const result = await post("/Order/AddOrderItem", {
         orderId,

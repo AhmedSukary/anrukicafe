@@ -5,6 +5,7 @@ import {
     UpdateOrder,
     GetAllOrderItemsByOrderId,
     AddNewOrder,
+    AddOrderToPrint,
     AddOrderItem,
     UpdateItem,
     RemoveItem,
@@ -506,10 +507,10 @@ SendOrderEle.addEventListener("click", async () => {
         Loading.classList.remove("hidden");
         await UpdateOrder(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
         await UpdateTable(currentTable.id, currentTable.number, currentTable.isAvailable, "Processing");
+        await AddOrderToPrint(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
         currentTable = null;
         currentOrder = null;
         location.reload();
-
     }
     catch (err) {
         alert("⚠️ " + err.message);
