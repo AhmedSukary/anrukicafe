@@ -20,12 +20,13 @@ export async function AddNewOrder(orderedName, tableNumber) {
     return result;
 }
 
-export async function AddOrderItem(orderId, name, description, price) {
+export async function AddOrderItem(orderId, name, description, price, printerName) {
     const result = await post("/Order/AddOrderItem", {
         orderId,
         name,
         description,
         price,
+        printerName,
     });
     return result;
 }
@@ -43,13 +44,14 @@ export async function UpdateOrder(id, status, payment, orderedName, total, table
     return result;
 }
 
-export async function UpdateItem(id, orderId, name, description, price) {
+export async function UpdateItem(id, orderId, name, description, price, printerName) {
     const result = await put("/Order/EditOrderItem", {
         id,
         orderId,
         name,
         description,
         price,
+        printerName,
     });
     return result;
 }

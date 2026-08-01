@@ -56,7 +56,7 @@ async function addNewOrder() {
     OrderIdEle.innerText = currentOrder.id;
 }
 
-async function addOrderItem(name, price, quantity) {
+async function addOrderItem(name, price, quantity, printerName) {
     if (currentTable == null)
         return alert("ℹ️ Please select table befor adding any items to order");
 
@@ -64,13 +64,13 @@ async function addOrderItem(name, price, quantity) {
         if (currentOrder == null) {
             await addNewOrder();
             for (let i = 0; i < quantity; i++) {
-                await AddOrderItem(currentOrder.id, name, "", price);
+                await AddOrderItem(currentOrder.id, name, "", price, printerName);
             }
             await renderOrderItems(currentOrder.id);
             return;
         }
         for (let i = 0; i < quantity; i++) {
-            await AddOrderItem(currentOrder.id, name, "", price);
+            await AddOrderItem(currentOrder.id, name, "", price, printerName);
         }
         await renderOrderItems(currentOrder.id);
     }
@@ -145,7 +145,7 @@ async function renderProductsByCategoryById(id) {
 
         document.getElementById(`send-item-${p.id}`).addEventListener("click", async () => {
             let count = document.getElementById(`quantity-item-${p.id}`).innerHTML;
-            await addOrderItem(p.name, p.price, count);
+            await addOrderItem(p.name, p.price, count, p.printerName);
             renderProductsByCategoryById(id);
         });
 
@@ -174,76 +174,6 @@ async function renderTables() {
         });
     }
 }
-
-// async function renderAddExtraOrderItemBox(orderItems) {
-//     try {
-//         const extraItems = await GetAllExtraDetailsOrderItem();
-
-//         ExtraOrderItemBox.innerHTML = "";
-//         ExtraOrderItemBox.classList.remove("hidden");
-//         ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
-//             <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
-//             <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>           
-//             <div id="extraOrderItems" class="extraOrderItems"></div>           
-//             <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
-//         `);
-
-//         const orderItemsToAddExtra = document.getElementById("orderItemsToAddExtra");
-//         for (const item of orderItems) {
-//             orderItemsToAddExtra.insertAdjacentHTML("beforeend", `
-//             <div class="item">
-//                 <div class="info">
-//                     <div class="details">
-//                         <span>1</span>
-//                         <span>${item.name}</span>
-//                     </div>
-//                 </div>
-//                 <div class="description">
-//                     <input id="description-item-${item.id}" type="text" value="${item.description}">
-//                 </div>
-//             </div>      
-//         `);
-//         }
-
-//         const extraOrderItems = document.getElementById("extraOrderItems");
-//         for (const item of extraItems) {
-//             extraOrderItems.insertAdjacentHTML("beforeend", `
-//                 <div class="extraOrderItem">
-//                     <button id="extraOrderItemBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
-//                 </div>  
-//             `);
-
-//             document.getElementById(`extraOrderItemBtn-${item.id}`).addEventListener("click", () => {
-
-//             });
-//         }
-
-//         const extraOrderItems = document.getElementById("extraOrderItems");
-//         for (const item of extraItems) {
-//             extraOrderItems.insertAdjacentHTML("beforeend", `
-//                 <div class="extraOrderItem">
-//                     <button id="extraOrderItemBtn-${item.id}" value="${item.extraPrice}">${item.extraDetails}<br>${item.extraPrice}₺</button>
-//                 </div>  
-//             `);
-
-//             document.getElementById(`extraOrderItemBtn-${item.id}`).addEventListener("click", () => {
-
-//             });
-//         }
-
-
-//         document.getElementById("extraOrderItemBoxCompleteBtn").addEventListener("click", async () => {
-//             ExtraOrderItemBox.classList.add("hidden");
-//         });
-
-//         document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
-//             ExtraOrderItemBox.classList.add("hidden");
-//         });
-//     }
-//     catch (err) {
-//         alert("⚠️ " + err.message);
-//     }
-// }
 
 async function renderTableBox(table) {
 
@@ -352,7 +282,7 @@ CanselOrderEle.addEventListener("click", async () => {
 
 class OrderItemsToAddExtraControl {
 
-    constructor(id, orderId, name, price, description) {
+    constructor(id, orderId, name, price, description, printerName) {
         this.IsComplete = false;
         this.IsChecked = false;
         this.id = id;
@@ -362,6 +292,7 @@ class OrderItemsToAddExtraControl {
         this.description = description;
         this.extraPrice = price
         this.extraDetails = description;
+        this.printerName = printerName;
     }
 
     AddExtra(extraPrice, extraDetails) {
@@ -388,7 +319,7 @@ class OrderItemsToAddExtraControl {
 
     async Save() {
         try {
-            await UpdateItem(this.id, this.orderId, this.name,this.extraDetails, this.extraPrice);
+            await UpdateItem(this.id, this.orderId, this.name,this.extraDetails, this.extraPrice, this.printerName);
         }
         catch (err) {
             alert("⚠️ " + err.message);
@@ -518,7 +449,7 @@ AddExtraToOrder.addEventListener("click", async () => {
     });
 
     for (const item of orderItems) {
-        controls.push(new OrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description));
+        controls.push(new OrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description, item.printerName));
     }
 
     renderOrderItemsToAddExtraControls();
@@ -565,22 +496,6 @@ AddExtraToOrder.addEventListener("click", async () => {
         await renderOrderItems(currentOrder.id);
     });
 });
-
-{/* <div class="orderItemToAddExtra">
-                <div class="details">
-                    <input type="checkbox" name="" id="">
-                    <span>1</span>
-                    <span>name</span>
-                    <span>00</span>
-                </div>
-                <div class="description">
-                    <textarea name="" id=""></textarea>
-                    <div class="controls">
-                        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/external-ban-miscellaneous-elements-glyph-bartama-glyph-64-bartama-graphic.png" alt=""></button>                       
-                        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
-                    </div>
-                </div>
-            </div>   */}
 
 SendOrderEle.addEventListener("click", async () => {
     if (currentOrder == null || OrderItemsEle.innerHTML == "")
