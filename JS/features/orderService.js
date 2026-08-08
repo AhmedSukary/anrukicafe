@@ -12,6 +12,10 @@ export async function GetAllExtraDetailsOrderItem() {
     return await get("/Order/GetAllExtraDetailsOrderItem");
 }
 
+export async function GetOrderItemById(id) {
+    return await get("/Order/GetOrderItemBy/" + id);
+}
+
 export async function AddNewOrder(orderedName, tableNumber) {
     const result = await post("/Order/AddNewOrder", {
         orderedName,
@@ -33,13 +37,14 @@ export async function AddOrderToPrint(id, status, payment, orderedName, total, t
     return result;
 }
 
-export async function AddOrderItem(orderId, name, description, price, printerName) {
+export async function AddOrderItem(orderId, name, description, price, printerName, status) {
     const result = await post("/Order/AddOrderItem", {
         orderId,
         name,
         description,
         price,
         printerName,
+        status,
     });
     return result;
 }
@@ -57,7 +62,7 @@ export async function UpdateOrder(id, status, payment, orderedName, total, table
     return result;
 }
 
-export async function UpdateItem(id, orderId, name, description, price, printerName) {
+export async function UpdateItem(id, orderId, name, description, price, printerName, status) {
     const result = await put("/Order/EditOrderItem", {
         id,
         orderId,
@@ -65,6 +70,7 @@ export async function UpdateItem(id, orderId, name, description, price, printerN
         description,
         price,
         printerName,
+        status,
     });
     return result;
 }
