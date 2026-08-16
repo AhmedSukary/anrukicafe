@@ -333,7 +333,6 @@ async function renderTableBox(table) {
     document.getElementById("closeBtn").addEventListener("click", () => {
         currentTable = null;
         currentOrder = null;
-        OrderIdEle.innerHTML = "???";
         TableNumberEle.innerHTML = "???";
         TableBox.classList.add("hidden");
     });
