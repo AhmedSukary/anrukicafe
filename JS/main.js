@@ -82,7 +82,6 @@ async function addOrderItem(name, price, quantity, printerName) {
 
 async function renderOrderItems(orderId) {
     currentOrder.total = 0;
-    console.log("from start fun"+ currentOrder.total);
     const items = await GetAllOrderItemsByOrderId(orderId);
     OrderItemsEle.innerHTML = "";
 
@@ -108,8 +107,6 @@ async function renderOrderItems(orderId) {
         });
         currentOrder.total += i.price;
     }
-    console.log("from end fun"+ currentOrder.total);
-
     OrderTotalAmountEle.innerText = currentOrder.total + "₺";
 }
 
@@ -626,7 +623,6 @@ AddExtraToOrder.addEventListener("click", async () => {
         for (const control of controls) {
             await control.Save();
         }
-        console.log("clocked");
         await renderOrderItems(currentOrder.id);
         ExtraOrderItemBox.classList.add("hidden");
     });
