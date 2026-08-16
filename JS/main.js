@@ -18,10 +18,70 @@ const params = new URLSearchParams(window.location.search);
 const UseingSystemName = params.get("UseingSystemName");
 document.getElementById("useingSystemName").innerText = UseingSystemName;
 
-let currentOrder;
+class ClassOrder {
+    constructor(id, status, payment, orderedName, total, tableNumber, createdAt) {
+        this.id = id;
+        this.status = status;
+        this.payment = payment;
+        this.orderedName = orderedName;
+        this.total = total;
+        this.tableNumber = tableNumber;
+        this.createdAt = createdAt;
+    }
+
+    async Add() {
+        try {
+
+            let NewOrder = await AddNewOrder(UseingSystemName, currentTable.number);          
+            this.id = NewOrder.id;
+            this.status = NewOrder.status;
+            this.payment = NewOrder.payment;
+            this.orderedName = NewOrder.orderedName;
+            this.total = NewOrder.total;
+            this.tableNumber = NewOrder.tableNumber;
+            this.createdAt = NewOrder.createdAt;        
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    }
+
+    async Save() {
+        try {
+            await UpdateOrder(this.Id, this.Status, this.Payment, this.OrderedName, this.Total, this.TableNumber, this.CreatedAt)
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    }
+}
+
+class ClassOrderItem {
+    constructor(id, orderId, name, description, price, printerName, status) {
+        this.id = id;
+        this.orderId = orderId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.printerName = printerName;
+        this.status = status;
+    }
+
+    async Save() {
+        try {
+            const NewOrderItem = await AddOrderItem(this.orderId, this.name, this.description, this.price, this.printerName, this.status);
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    }
+}
+
+let currentOrder = null;
+let orderItems = [];
 let currentTable;
 let CategoryById = 1;
-const OrderIdEle = document.getElementById("orderId");
+
 const TableNumberEle = document.getElementById("tableNumber");
 const OrderTotalAmountEle = document.getElementById("orderTotalAmount");
 const SendOrderEle = document.getElementById("sendOrder");
@@ -52,40 +112,40 @@ async function categorySelect() {
     }
 }
 
-async function addNewOrder() {
-    currentOrder = await AddNewOrder(UseingSystemName, currentTable.number);
-    OrderIdEle.innerText = currentOrder.id;
+function addNewOrder() {
+    currentOrder = new ClassOrder(-1, "", "", "", 0, 0, null);   
 }
 
-async function addOrderItem(name, price, quantity, printerName) {
+function addOrderItem(name, price, quantity, printerName) {
     if (currentTable == null)
         return alert("ℹ️ Please select table befor adding any items to order");
 
     try {
         if (currentOrder == null) {
-            await addNewOrder();
+            addNewOrder();
             for (let i = 0; i < quantity; i++) {
-                await AddOrderItem(currentOrder.id, name, "", price, printerName, "Processing");
+                let orderItem = new ClassOrderItem(crypto.randomUUID(), currentOrder.id, name, "", price, printerName, "Processing");
+                orderItems.push(orderItem);
             }
-            await renderOrderItems(currentOrder.id);
+            renderOrderItems();
             return;
         }
         for (let i = 0; i < quantity; i++) {
-            await AddOrderItem(currentOrder.id, name, "", price, printerName, "Processing");
+            let orderItem = new ClassOrderItem(crypto.randomUUID(), currentOrder.id, name, "", price, printerName, "Processing");
+            orderItems.push(orderItem);
         }
-        await renderOrderItems(currentOrder.id);
+        renderOrderItems();
     }
     catch (err) {
         alert("⚠️ " + err.message);
     }
 }
 
-async function renderOrderItems(orderId) {
+function renderOrderItems() {
     currentOrder.total = 0;
-    const items = await GetAllOrderItemsByOrderId(orderId);
     OrderItemsEle.innerHTML = "";
 
-    for (const i of items) {
+    for (const i of orderItems) {
         OrderItemsEle.insertAdjacentHTML("beforeend", `
             <div class="item">
                 <div class="info">
@@ -102,8 +162,11 @@ async function renderOrderItems(orderId) {
             </div>      
         `);
         document.getElementById(`remove-item-${i.id}`).addEventListener("click", async () => {
-            await RemoveItem(i.id);
-            await renderOrderItems(orderId);
+            const index = orderItems.findIndex(x => x.id === i.id);
+            if (index !== -1) {
+                orderItems.splice(index, 1);
+            }
+            renderOrderItems();
         });
         currentOrder.total += i.price;
     }
@@ -320,13 +383,12 @@ CanselOrderEle.addEventListener("click", async () => {
     try {
         let answer = confirm("ℹ️ Do you want to remove all order items?");
         if (answer) {
-            const result = await RemoveAllItems(currentOrder.id);
+            orderItems = [];
             currentOrder.total = 0;
             OrderTotalAmountEle.innerText = currentOrder.total + "₺";
             OrderItemsEle.innerHTML = "";
             TableNumberEle.innerText = "???";
-            currentTable = null;
-            alert("✅ " + result.success);
+            currentTable = null;           
         }
         else
             return;
@@ -335,6 +397,61 @@ CanselOrderEle.addEventListener("click", async () => {
         alert("⚠️ " + err.message);
     }
 });
+
+class ClassOrderItemsToAddExtraControl {
+
+    constructor(id, orderId, name, price, description, printerName, status) {
+        this.IsComplete = false;
+        this.IsChecked = false;
+        this.id = id;
+        this.orderId = orderId;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.extraPrice = price
+        this.extraDetails = description;
+        this.printerName = printerName;
+        this.status = status;
+    }
+
+    AddExtra(extraPrice, extraDetails) {
+        this.extraPrice += extraPrice;
+        this.extraDetails += extraDetails + " ";
+    }
+
+    Clear() {
+        this.extraPrice = this.price;
+        this.extraDetails = this.description;
+    }
+
+    Check() {
+        this.IsChecked = true;
+    }
+
+    UnCheck() {
+        this.IsChecked = false;
+    }
+
+    CompleteExtraDetails() {
+        this.IsComplete = true;
+    }
+
+    async Save() {
+        try {
+            const item = orderItems.find(x => x.id === this.id);
+            item.id = this.id;
+            item.orderId = this.orderId;
+            item.name = this.name;
+            item.description = this.extraDetails;
+            item.price = this.extraPrice;
+            item.printerName = this.printerName;
+            item.status = this.status;
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    }
+}
 
 class OrderItemsToAddExtraControl {
 
@@ -561,9 +678,8 @@ AddExtraToOrder.addEventListener("click", async () => {
 
     controls = [];
     const extraItems = await GetAllExtraDetailsOrderItem();
-    const orderItems = await GetAllOrderItemsByOrderId(currentOrder.id);
     ExtraOrderItemBox.innerHTML = "";
-    ExtraOrderItemBox.insertAdjacentHTML("beforeend",`
+    ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
         <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
         <div class="checkAll"><input type="checkbox" name="" id="checkAllOrderItemsToAddExtra"> All</div>
         <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>
@@ -576,8 +692,8 @@ AddExtraToOrder.addEventListener("click", async () => {
         ExtraOrderItemBox.classList.add("hidden");
     });
 
-    for (const item of orderItems) {
-        controls.push(new OrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description, item.printerName, item.status));
+    for (const item of orderItems) {    
+        controls.push(new ClassOrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description, item.printerName, item.status));
     }
 
     renderOrderItemsToAddExtraControls();
@@ -623,7 +739,7 @@ AddExtraToOrder.addEventListener("click", async () => {
         for (const control of controls) {
             await control.Save();
         }
-        await renderOrderItems(currentOrder.id);
+        renderOrderItems();
         ExtraOrderItemBox.classList.add("hidden");
     });
 });
@@ -635,6 +751,14 @@ SendOrderEle.addEventListener("click", async () => {
     try {
 
         Loading.classList.remove("hidden");
+        await currentOrder.Add();
+        let total = 0;
+        for(const item of orderItems){
+            item.orderId = currentOrder.id;           
+            total += item.price;
+            await item.Save();
+        }
+        currentOrder.total = total;
         await UpdateOrder(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
         await UpdateTable(currentTable.id, currentTable.number, currentTable.isAvailable, "Processing");
         await AddOrderToPrint(currentOrder.id, currentOrder.status, currentOrder.payment, currentOrder.orderedName, currentOrder.total, currentTable.number, currentOrder.createdAt);
