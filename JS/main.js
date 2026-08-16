@@ -340,22 +340,22 @@ async function renderTableBox(table) {
     if (table.status == "Processed") {
         TableBox.insertAdjacentHTML("beforeend", `
             <div class="controls">
-                <!-- <button id="addExtra"><img src="imgs/992651.png" alt=""></button> -->
+                <button id="addExtra"><img src="imgs/992651.png" alt=""></button>
             </div>  
         `);
 
-        // document.getElementById("addExtra").addEventListener("click", () => {
-        //     TableNumberEle.innerText = currentTable.number;
-        //     TableBox.innerHTML = "";
-        //     TableBox.classList.add("hidden");
-        // });
+        document.getElementById("addExtra").addEventListener("click", () => {
+            TableNumberEle.innerText = currentTable.number;
+            TableBox.innerHTML = "";
+            TableBox.classList.add("hidden");
+        });
     }
 
     if (table.status == "Processing") {
         TableBox.insertAdjacentHTML("beforeend", `
             <div class="controls">
                 <button id="processed"><img src="imgs/18442.png" alt=""></button>
-                <!-- <button id="addExtra"><img src="imgs/992651.png" alt=""></button> -->
+                <button id="addExtra"><img src="imgs/992651.png" alt=""></button> 
             </div>  
         `);
 
@@ -364,11 +364,11 @@ async function renderTableBox(table) {
             location.reload();
         });
 
-        // document.getElementById("addExtra").addEventListener("click", () => {
-        //     TableNumberEle.innerText = currentTable.number;
-        //     TableBox.innerHTML = "";
-        //     TableBox.classList.add("hidden");
-        // });
+        document.getElementById("addExtra").addEventListener("click", () => {
+            TableNumberEle.innerText = currentTable.number;
+            TableBox.innerHTML = "";
+            TableBox.classList.add("hidden");
+        });
     }
 
     TableBox.insertAdjacentHTML("beforeend", `
