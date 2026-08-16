@@ -82,6 +82,7 @@ async function addOrderItem(name, price, quantity, printerName) {
 
 async function renderOrderItems(orderId) {
     currentOrder.total = 0;
+    console.log("from start fun"+ currentOrder.total);
     const items = await GetAllOrderItemsByOrderId(orderId);
     OrderItemsEle.innerHTML = "";
 
@@ -103,10 +104,12 @@ async function renderOrderItems(orderId) {
         `);
         document.getElementById(`remove-item-${i.id}`).addEventListener("click", async () => {
             await RemoveItem(i.id);
-            renderOrderItems(orderId);
+            await renderOrderItems(orderId);
         });
         currentOrder.total += i.price;
     }
+    console.log("from end fun"+ currentOrder.total);
+
     OrderTotalAmountEle.innerText = currentOrder.total + "₺";
 }
 
@@ -562,8 +565,16 @@ AddExtraToOrder.addEventListener("click", async () => {
     controls = [];
     const extraItems = await GetAllExtraDetailsOrderItem();
     const orderItems = await GetAllOrderItemsByOrderId(currentOrder.id);
-
+    ExtraOrderItemBox.innerHTML = "";
+    ExtraOrderItemBox.insertAdjacentHTML("beforeend",`
+        <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
+        <div class="checkAll"><input type="checkbox" name="" id="checkAllOrderItemsToAddExtra"> All</div>
+        <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>
+        <div id="extraOrderItems" class="extraOrderItems"></div>
+        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+    `);
     ExtraOrderItemBox.classList.remove("hidden");
+
     document.getElementById("extraOrderItemBoxCloseBtn").addEventListener("click", () => {
         ExtraOrderItemBox.classList.add("hidden");
     });
@@ -615,8 +626,9 @@ AddExtraToOrder.addEventListener("click", async () => {
         for (const control of controls) {
             await control.Save();
         }
-        ExtraOrderItemBox.classList.add("hidden");
+        console.log("clocked");
         await renderOrderItems(currentOrder.id);
+        ExtraOrderItemBox.classList.add("hidden");
     });
 });
 
