@@ -32,14 +32,14 @@ class ClassOrder {
     async Add() {
         try {
 
-            let NewOrder = await AddNewOrder(UseingSystemName, currentTable.number);          
+            let NewOrder = await AddNewOrder(UseingSystemName, currentTable.number);
             this.id = NewOrder.id;
             this.status = NewOrder.status;
             this.payment = NewOrder.payment;
             this.orderedName = NewOrder.orderedName;
             this.total = NewOrder.total;
             this.tableNumber = NewOrder.tableNumber;
-            this.createdAt = NewOrder.createdAt;        
+            this.createdAt = NewOrder.createdAt;
         }
         catch (err) {
             alert("⚠️ " + err.message);
@@ -113,7 +113,7 @@ async function categorySelect() {
 }
 
 function addNewOrder() {
-    currentOrder = new ClassOrder(-1, "", "", "", 0, 0, null);   
+    currentOrder = new ClassOrder(-1, "", "", "", 0, 0, null);
 }
 
 function addOrderItem(name, price, quantity, printerName) {
@@ -210,7 +210,6 @@ async function renderProductsByCategoryById(id) {
             await addOrderItem(p.name, p.price, count, p.printerName);
             renderProductsByCategoryById(id);
         });
-
     }
 }
 
@@ -226,6 +225,13 @@ async function renderTables() {
 
         document.getElementById(`button-${t.id}`).addEventListener("click", async () => {
             currentTable = await getTableById(t.id);
+
+            document.querySelectorAll(".table").forEach(t => t.classList.remove("Selected"));
+
+            if (!document.getElementById(`table-${t.id}`).classList.contains("Processing") &&
+                !document.getElementById(`table-${t.id}`).classList.contains("Processed")) {
+                document.getElementById(`table-${t.id}`).classList.add("Selected");
+            }
 
             if (currentTable.status != "Empty") {
                 await renderTableBox(currentTable);
@@ -243,20 +249,22 @@ async function renderTableBox(table) {
     TableBox.classList.remove("hidden");
     TableBox.insertAdjacentHTML("beforeend", `
         <div class="closeBtn"><button id="closeBtn">x</button></div>
+        <div class="copyToEmptyTable"><button id="copyToEmptyTableBtn"><img src="imgs/tabe-tree-icon.png" alt=""></button></div>
         <div class="table ${table.status}"> <img src="imgs/table.png" alt="">${table.number}</div>    
     `);
     const orders = await GetTableUnpaidOrdersByTableNumber(table.number);
     let totalAmount = 0;
     for (const order of orders) {
-
         TableBox.insertAdjacentHTML("beforeend", `
             <div class="order">
                 <span class="orderId">ID: ${order.id}</span>
                 <p>Time: ${formatShortDateTime(order.createdAt)}</p>
                 <div id="orderItems-${order.id}" class="orderItems"></div>
                 <div id="totalOfOrder-${order.id}" class="total">Amount: ${order.total}₺</div>
+
             </div>
         `);
+
         const Items = await GetAllOrderItemsByOrderId(order.id);
         let orderTotal = 0;
         for (const Item of Items) {
@@ -328,6 +336,8 @@ async function renderTableBox(table) {
         }
         document.getElementById(`totalOfOrder-${order.id}`).innerText = `Amount: ${orderTotal}₺`;
         totalAmount += orderTotal;
+
+
     }
 
     document.getElementById("closeBtn").addEventListener("click", () => {
@@ -335,6 +345,10 @@ async function renderTableBox(table) {
         currentOrder = null;
         TableNumberEle.innerHTML = "???";
         TableBox.classList.add("hidden");
+    });
+
+    document.getElementById("copyToEmptyTableBtn").addEventListener("click", () => {
+
     });
 
     if (table.status == "Processed") {
@@ -387,7 +401,7 @@ CanselOrderEle.addEventListener("click", async () => {
             OrderTotalAmountEle.innerText = currentOrder.total + "₺";
             OrderItemsEle.innerHTML = "";
             TableNumberEle.innerText = "???";
-            currentTable = null;           
+            currentTable = null;
         }
         else
             return;
@@ -611,6 +625,14 @@ async function AddExtraToOrderItem(orderItemId, table) {
     try {
         const item = await GetOrderItemById(orderItemId);
         const extraItems = await GetAllExtraDetailsOrderItem();
+        ExtraOrderItemBox.innerHTML = "";
+        ExtraOrderItemBox.insertAdjacentHTML("beforeend", `
+        <div class="closeBtn"><button id="extraOrderItemBoxCloseBtn">x</button></div>
+        <div class="checkAll"><input type="checkbox" name="" id="checkAllOrderItemsToAddExtra"> All</div>
+        <div id="orderItemsToAddExtra" class="orderItemsToAddExtra"></div>
+        <div id="extraOrderItems" class="extraOrderItems"></div>
+        <button id="extraOrderItemBoxCompleteBtn"><img src="imgs/18442.png" alt=""></button>
+    `);
 
         controls = [];
         controls.push(new OrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description, item.printerName, item.status));
@@ -691,7 +713,7 @@ AddExtraToOrder.addEventListener("click", async () => {
         ExtraOrderItemBox.classList.add("hidden");
     });
 
-    for (const item of orderItems) {    
+    for (const item of orderItems) {
         controls.push(new ClassOrderItemsToAddExtraControl(item.id, item.orderId, item.name, item.price, item.description, item.printerName, item.status));
     }
 
@@ -752,8 +774,8 @@ SendOrderEle.addEventListener("click", async () => {
         Loading.classList.remove("hidden");
         await currentOrder.Add();
         let total = 0;
-        for(const item of orderItems){
-            item.orderId = currentOrder.id;           
+        for (const item of orderItems) {
+            item.orderId = currentOrder.id;
             total += item.price;
             await item.Save();
         }
