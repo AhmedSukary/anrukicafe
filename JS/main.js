@@ -407,9 +407,12 @@ async function renderEmptyTablesBox(orders, tableCapy) {
 
     const EmptyTablesToCapy = document.getElementById("emptyTablesToCapy");
     for (const table of tables) {
+        if (table.status !== "Empty") {
+            continue;
+        }
         EmptyTablesToCapy.insertAdjacentHTML("beforeend", `
             <div id="table" class="table">
-                <button id="button-${table.id}"> <img src="imgs/table.png" alt="">???</button>
+                <button id="button-${table.id}"> <img src="imgs/table.png" alt="">${table.number}</button>
             </div> 
         `);
 
