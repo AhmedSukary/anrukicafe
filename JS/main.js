@@ -80,7 +80,6 @@ class ClassOrderItem {
 let currentOrder = null;
 let orderItems = [];
 let currentTable;
-let CategoryById = 1;
 
 const TableNumberEle = document.getElementById("tableNumber");
 const OrderTotalAmountEle = document.getElementById("orderTotalAmount");
@@ -92,6 +91,7 @@ const OrderItemsEle = document.getElementById("orderItems");
 const ProductsEle = document.getElementById("products");
 const TablesEle = document.getElementById("tables");
 const TableBox = document.getElementById("tableBox");
+const EmptyTablesBox = document.getElementById("emptyTablesBox");
 const Loading = document.getElementById("loading");
 const ExtraOrderItemBox = document.getElementById("extraOrderItemBox");
 const CategoriesBtns = document.querySelectorAll(".categoryBtn");
@@ -261,7 +261,6 @@ async function renderTableBox(table) {
                 <p>Time: ${formatShortDateTime(order.createdAt)}</p>
                 <div id="orderItems-${order.id}" class="orderItems"></div>
                 <div id="totalOfOrder-${order.id}" class="total">Amount: ${order.total}₺</div>
-
             </div>
         `);
 
@@ -336,8 +335,6 @@ async function renderTableBox(table) {
         }
         document.getElementById(`totalOfOrder-${order.id}`).innerText = `Amount: ${orderTotal}₺`;
         totalAmount += orderTotal;
-
-
     }
 
     document.getElementById("closeBtn").addEventListener("click", () => {
@@ -347,8 +344,8 @@ async function renderTableBox(table) {
         TableBox.classList.add("hidden");
     });
 
-    document.getElementById("copyToEmptyTableBtn").addEventListener("click", () => {
-
+    document.getElementById("copyToEmptyTableBtn").addEventListener("click", async () => {
+        await renderEmptyTablesBox(orders, currentTable);
     });
 
     if (table.status == "Processed") {
@@ -388,6 +385,59 @@ async function renderTableBox(table) {
     TableBox.insertAdjacentHTML("beforeend", `
         <div class="totalAmount">Total Amount: ${totalAmount}₺</div>  
     `);
+}
+
+async function renderEmptyTablesBox(orders, tableCapy) {
+    const tables = await getAllTables();
+    let tableToSwitch = null;
+    EmptyTablesBox.innerHTML = "";
+    EmptyTablesBox.classList.remove("hidden");
+    EmptyTablesBox.insertAdjacentHTML("beforeend", `
+        <div class="closeBtn"><button id="emptyTablesBoxCloseBtn">x</button></div>
+        <div class="switchTable">
+            <div class="currentTable"><img src="imgs/table.png" alt=""><span id="currentTableNamber">${tableCapy.number}</span></div>
+            <span>-></span>
+            <div class="capyToTable"><img src="imgs/table.png" alt=""><span id="capyToTableNamber">???</span></div>
+        </div>
+        <div class="emptyTables" id="emptyTablesToCapy"></div>
+        <div class="completeCapyToTable">
+            <button id="completeCapyToTableBtn"><img src="imgs/18442.png" alt=""></button>
+        </div>
+    `);
+
+    const EmptyTablesToCapy = document.getElementById("emptyTablesToCapy");
+    for (const table of tables) {
+        EmptyTablesToCapy.insertAdjacentHTML("beforeend", `
+            <div id="table" class="table">
+                <button id="button-${table.id}"> <img src="imgs/table.png" alt="">???</button>
+            </div> 
+        `);
+
+        document.getElementById(`button-${table.id}`).addEventListener("click", () => {
+            tableToSwitch = table;
+            document.getElementById("capyToTableNamber").innerText = tableToSwitch.number;
+        });
+    }
+
+    document.getElementById("completeCapyToTableBtn").addEventListener("click", async () => {
+        try {
+            if (tableToSwitch === null)
+                return alert("ℹ️ No table to switch");
+
+            for (const order of orders) {
+                await UpdateOrder(order.id, order.status, order.payment, order.orderedName, order.total, tableToSwitch.number, order.createdAt);
+            }
+            await UpdateTable(tableToSwitch.id, tableToSwitch.number, tableToSwitch.isAvailable, tableCapy.status);
+            await UpdateTable(tableCapy.id, tableCapy.number, tableCapy.isAvailable, "Empty");
+            location.reload();
+        }
+        catch (err) {
+            alert("⚠️ " + err.message);
+        }
+    });
+}
+async function renderCopyToEmptyTable(orders) {
+
 }
 
 CanselOrderEle.addEventListener("click", async () => {
